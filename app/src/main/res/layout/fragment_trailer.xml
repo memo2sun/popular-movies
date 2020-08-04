@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.TrailerFragment">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_trailerList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/tv_no_trailer_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_trailer_yet"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@color/no_review_text"
+            android:textSize="18sp"
+            android:visibility="invisible"/>
+
+    </FrameLayout>
+</layout>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="play_big_icon">50dp</dimen>
+    <dimen name="favorite_unfavorite_icon">50dp</dimen>
+    <dimen name="progress_bar_icon">100dp</dimen>
+    <dimen name="label_icon">25dp</dimen>
+    <dimen name="trailer_play_icon">30dp</dimen>
+    <dimen name="movie_thumbnail_width">150dp</dimen>
+    <dimen name="movie_thumbnail_height">200dp</dimen>
+    <dimen name="movie_title_margin_in_detail_activity">8dp</dimen>
+    <dimen name="text_body_padding">8dp</dimen>
+
+
+</resources>

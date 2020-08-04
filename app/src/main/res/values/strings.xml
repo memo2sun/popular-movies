@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="error_message">No network available.</string>
+    <string name="sort_by_rate">Sort By Rate</string>
+    <string name="sort_by_popularity">Sort By Popularity</string>
+    <string name="my_favorite">My Favorite</string>
+    <string name="action_share">Share</string>
+    <string name="movie_poster_thumbnail">movie poster thumbnail</string>
+    <string name="movie_rate_icon">movie rate icon</string>
+    <string name="movie_release_date_icon">movie release date icon</string>
+    <string name="trailer_thumbnail">trailer thumbnail</string>
+    <string name="review_author_icon">review author icon</string>
+    <string name="movie_backdrop_image">movie backdrop image</string>
+    <string name="trailer_play_icon">trailer play icon</string>
+    <string name="favorite_and_unfavorite_switch_icon">favorite and unfavorite switch icon</string>
+    <string name="movie_poster">movie poster</string>
+    <string name="notification_title">Movie Data Sync</string>
+    <string name="notification_body">Movie sync has been finished with themoviedb.org</string>
+    <string name="main_notification_channel_name">Primary</string>
+    <string name="no_review_message">No review yet.</string>
+    <string name="no_trailer_yet">No trailer yet.</string>
+
+</resources>

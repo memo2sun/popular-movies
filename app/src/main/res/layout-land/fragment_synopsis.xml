@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.core.widget.NestedScrollView
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.SynopsisFragment">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <ImageView
+                android:id="@+id/iv_movie_thumbnail"
+                android:layout_width="@dimen/movie_thumbnail_width"
+                android:layout_height="@dimen/movie_thumbnail_height"
+                android:contentDescription="@string/movie_poster_thumbnail"
+                app:layout_constraintBottom_toTopOf="@+id/tv_overview"
+                app:layout_constraintEnd_toStartOf="@+id/guideline3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <ImageView
+                android:id="@+id/iv_release_date"
+                android:layout_width="@dimen/label_icon"
+                android:layout_height="@dimen/label_icon"
+                android:layout_marginStart="16dp"
+                android:contentDescription="@string/movie_release_date_icon"
+                android:src="@drawable/ic_baseline_date_range_24"
+                app:layout_constraintBottom_toTopOf="@+id/iv_rate"
+                app:layout_constraintEnd_toStartOf="@+id/tv_release_date"
+                app:layout_constraintHorizontal_bias="0.551"
+                app:layout_constraintStart_toStartOf="@+id/guideline3"
+                app:layout_constraintTop_toTopOf="@+id/iv_movie_thumbnail" />
+
+            <TextView
+                android:id="@+id/tv_release_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="32dp"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_release_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_release_date"
+                app:layout_constraintVertical_bias="1.0"
+                tools:text="01-01-2021" />
+
+            <ImageView
+                android:id="@+id/iv_rate"
+                android:layout_width="@dimen/label_icon"
+                android:layout_height="@dimen/label_icon"
+                android:layout_marginBottom="60dp"
+                android:contentDescription="@string/movie_rate_icon"
+                android:src="@drawable/ic_baseline_star_24"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_movie_thumbnail"
+                app:layout_constraintEnd_toEndOf="@+id/iv_release_date"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/iv_release_date" />
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/primary_text"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_rate"
+                app:layout_constraintStart_toStartOf="@+id/tv_release_date"
+                app:layout_constraintTop_toTopOf="@+id/iv_rate"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="9.2/10" />
+
+            <TextView
+                android:id="@+id/tv_overview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/text_body_padding"
+                android:paddingTop="@dimen/text_body_padding"
+                android:paddingEnd="@dimen/text_body_padding"
+                android:paddingBottom="@dimen/text_body_padding"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="@color/primary_text"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_movie_thumbnail"
+                tools:text="movie overview" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>
