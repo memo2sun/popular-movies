@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import net.sunyounglee.browsemovies.BuildConfig;
+import net.sunyounglee.browsemovies.R;
 import net.sunyounglee.browsemovies.models.MoviePageObject;
 import net.sunyounglee.browsemovies.models.ReviewPageObject;
 import net.sunyounglee.browsemovies.models.TrailerPageObject;
@@ -20,13 +20,13 @@ import retrofit2.Response;
 public class MovieJsonUtils {
 
     private static final String TAG = MovieJsonUtils.class.getSimpleName();
-    private static final String API_KEY = BuildConfig.API_KEY;
+    private static String API_KEY;
 
     private static MovieAPIService service;
 
     public static LiveData<MoviePageObject> loadMovieDataFromServer(int sortBy, Context context) {
+        API_KEY = context.getString(R.string.my_api_key);
         MutableLiveData<MoviePageObject> movieData = new MutableLiveData<>();
-
         service = RetrofitUtil.getRetrofitInstance().create(MovieAPIService.class);
         Call<MoviePageObject> call = null;
         switch (sortBy) {
@@ -69,8 +69,8 @@ public class MovieJsonUtils {
 
 
     public static LiveData<ReviewPageObject> loadReviewDataFromServer(Context context, long movieId) {
+        API_KEY = context.getString(R.string.my_api_key);
         MutableLiveData<ReviewPageObject> reviewData = new MutableLiveData<>();
-
         Call<ReviewPageObject> call = service.reviewList(movieId, API_KEY);
         call.enqueue(new Callback<ReviewPageObject>() {
 
@@ -103,6 +103,7 @@ public class MovieJsonUtils {
     }
 
     public static LiveData<TrailerPageObject> loadTrailerDataFromServer(Context context, long movieId) {
+        API_KEY = context.getString(R.string.my_api_key);
         MutableLiveData<TrailerPageObject> trailerData = new MutableLiveData<>();
         Call<TrailerPageObject> call = service.trailerList(movieId, API_KEY);
         call.enqueue(new Callback<TrailerPageObject>() {
