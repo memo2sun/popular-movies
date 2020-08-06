@@ -9,9 +9,7 @@ import net.sunyounglee.browsemovies.data.ReviewDao;
 import net.sunyounglee.browsemovies.data.TrailerDao;
 import net.sunyounglee.browsemovies.models.Movie;
 import net.sunyounglee.browsemovies.models.Review;
-import net.sunyounglee.browsemovies.models.ReviewPageObject;
 import net.sunyounglee.browsemovies.models.Trailer;
-import net.sunyounglee.browsemovies.models.TrailerPageObject;
 import net.sunyounglee.browsemovies.utilities.MovieJsonUtils;
 
 import java.util.List;
@@ -23,41 +21,46 @@ public class DetailViewRepository {
     private static DetailViewRepository sInstance;
     private static final Object LOCK = new Object();
     private long movieId;
+    private Movie movieEntry;
 
-    private DetailViewRepository(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, long movieId) {
+    private DetailViewRepository(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, Movie movie) {
         this.movieDao = movieDao;
         this.reviewDao = reviewDao;
-        this.movieId = movieId;
         this.trailerDao = trailerDao;
+        movieEntry = movie;
+        movieId = movieEntry.getMovieId();
     }
 
-    public static DetailViewRepository getInstance(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, long movieId) {
+    public static DetailViewRepository getInstance(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, Movie movie) {
         if (sInstance == null) {
             synchronized (LOCK) {
-                sInstance = new DetailViewRepository(movieDao, reviewDao, trailerDao, movieId);
+                sInstance = new DetailViewRepository(movieDao, reviewDao, trailerDao, movie);
             }
         }
         return sInstance;
     }
 
-    public LiveData<ReviewPageObject> refreshReview(Context context, long movieId) {
+    public LiveData<List<Review>> reviewFromServer(Context context, long movieId) {
         return MovieJsonUtils.loadReviewDataFromServer(context, movieId);
     }
 
-    public LiveData<TrailerPageObject> refreshTrailer(Context context, long movieId) {
+    public LiveData<List<Trailer>> trailerFromServer(Context context, long movieId) {
         return MovieJsonUtils.loadTrailerDataFromServer(context, movieId);
     }
 
-    public LiveData<List<Review>> getReview() {
+    public LiveData<Movie> getMovie() {
+        return movieDao.loadMovieById(movieId);
+    }
+
+    public LiveData<List<Review>> getReview(long movieId) {
         return reviewDao.loadReviewById(movieId);
     }
 
-
-    public LiveData<List<Trailer>> getTrailer() {
+    public LiveData<List<Trailer>> getTrailer(long movieId) {
         return trailerDao.loadTrailerById(movieId);
     }
 
-    public LiveData<Movie> getMovieInfo(long movieId) {
+    public LiveData<Movie> getMovieFromDB(long movieId) {
         return movieDao.loadMovieById(movieId);
     }
 
@@ -65,7 +68,25 @@ public class DetailViewRepository {
         movieDao.deleteMovieById(movieId);
     }
 
-    public void updateMovieFavorite(long movieId) {
-        movieDao.updateMovieFavorite(true, movieId);
+    public void deleteReview(long movieId) {
+        reviewDao.deleteReviewById(movieId);
     }
+
+    public void deleteTrailer(long movieId) {
+        trailerDao.deleteTrailerById(movieId);
+    }
+
+    public void insertMovie(Movie movie) {
+        movieDao.insertMovie(movie);
+    }
+
+    public void insertReview(Review review) {
+        reviewDao.insertReview(review);
+    }
+
+    public void insertTrailer(Trailer trailer) {
+        trailerDao.insertTrailer(trailer);
+
+    }
+
 }

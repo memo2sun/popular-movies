@@ -43,17 +43,7 @@ public class MainViewRepository {
         return refreshMovie(context, 2);
     }
 
-    public LiveData<List<Movie>> getFavoriteMovies() {
-        return movieDao.loadFavoriteMovie();
-    }
-
-    public void insertOrUpdate(Movie movie) {
-        int count = movieDao.getMovieCountById(movie.getMovieId());
-        if (count == 0) {
-            movieDao.insertMovie(movie);
-        } else {
-            movieDao.updateMovieExceptFavorite(movie.getMovieId(), movie.getTitle(), movie.getPoster_image(), movie.getBackDrop_image(),
-                    movie.getOverview(), movie.getRating(), movie.getRelease_date());
-        }
+    public LiveData<List<Movie>> getMovies() {
+        return movieDao.loadAllMovies();
     }
 }

@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import net.sunyounglee.browsemovies.AppExecutors;
 import net.sunyounglee.browsemovies.R;
 import net.sunyounglee.browsemovies.data.AppDatabase;
 import net.sunyounglee.browsemovies.data.MovieDao;
@@ -39,18 +38,26 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String MOVIE_INTENT_EXTRA = "MOVIE_DATA";
 
+    private static final String MENU_ID = "menu_id";
+    private int menuId;
+
     private RecyclerView mRecyclerView;
     private MovieRecyclerViewAdapter mMovieRecyclerViewAdapter;
     private TextView mErrorMessage;
-
     private ProgressBar mLoadingIndicator;
-
     private MainViewModel mainViewModel;
+
+    private boolean savedInstanceStateBundle;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            savedInstanceStateBundle = true;
+            menuId = savedInstanceState.getInt(MENU_ID);
+        }
         ActivityMainBinding binding =
                 DataBindingUtil.setContentView(this, R.layout.activity_main);
         //   binding.setLifecycleOwner(this);
@@ -85,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
         showLoading();
 
-        //  MovieSyncUtils.initialize(this);
         setupViewModel();
     }
 
@@ -106,13 +112,21 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             mErrorMessage.setVisibility(View.VISIBLE);
         }
-
-        mainViewModel.getPopularMovies().observe(this, moviePageObject -> {
-            Log.d(TAG, "Updating list of popular movie list in ViewModel");
-            List<Movie> movies = moviePageObject.getResultList();
-            mMovieRecyclerViewAdapter.setMovieData(movies);
-            showMovieDataView();
-        });
+        if (savedInstanceStateBundle) {
+            switch (menuId) {
+                case R.id.sort_by_popularity:
+                    showPopularMovies();
+                    break;
+                case R.id.sort_by_rate:
+                    showTopRatedMovies();
+                    break;
+                case R.id.sort_by_favorite:
+                    showFavoriteMovies();
+                    break;
+            }
+        } else {
+            showPopularMovies();
+        }
     }
 
     @Override
@@ -124,49 +138,57 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
+        menuId = item.getItemId();
+        switch (menuId) {
             case R.id.sort_by_popularity:
-                mMovieRecyclerViewAdapter.setMovieData(null);
-                mainViewModel.getPopularMovies().observe(this, moviePageObject -> {
-                    Log.d(TAG, "Updating list of movies from POPULAR LiveData in ViewModel");
-                    List<Movie> movies = moviePageObject.getResultList();
-                    mMovieRecyclerViewAdapter.setMovieData(movies);
-                });
+                showPopularMovies();
                 return true;
             case R.id.sort_by_rate:
-                mMovieRecyclerViewAdapter.setMovieData(null);
-                mainViewModel.getTopRatedMovies().observe(this, moviePageObject -> {
-                    Log.d(TAG, "Updating list of movies from Top Rated LiveData in ViewModel");
-                    List<Movie> movies = moviePageObject.getResultList();
-                    mMovieRecyclerViewAdapter.setMovieData(movies);
-                });
+                showTopRatedMovies();
                 return true;
             case R.id.sort_by_favorite:
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mLoadingIndicator.setVisibility(View.INVISIBLE);
-                mErrorMessage.setVisibility(View.INVISIBLE);
-
-                mMovieRecyclerViewAdapter.setMovieData(null);
-                mainViewModel.getFavoriteMovies().observe(this, movies -> {
-                    Log.d(TAG, "Updating list of movies from favorite LiveData in ViewModel");
-                    if (movies != null) {
-                        mMovieRecyclerViewAdapter.setMovieData(movies);
-                    }
-                });
+                showFavoriteMovies();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void showPopularMovies() {
+        mMovieRecyclerViewAdapter.setMovieData(null);
+        mainViewModel.getPopularMovies().observe(this, moviePageObject -> {
+            Log.d(TAG, "Updating list of movies from POPULAR LiveData in ViewModel");
+            List<Movie> movies = moviePageObject.getResultList();
+            mMovieRecyclerViewAdapter.setMovieData(movies);
+            showMovieDataView();
+        });
+    }
+
+    private void showTopRatedMovies() {
+        mMovieRecyclerViewAdapter.setMovieData(null);
+        mainViewModel.getTopRatedMovies().observe(this, moviePageObject -> {
+            Log.d(TAG, "Updating list of movies from Top Rated LiveData in ViewModel");
+            List<Movie> movies = moviePageObject.getResultList();
+            mMovieRecyclerViewAdapter.setMovieData(movies);
+            showMovieDataView();
+        });
+    }
+
+    private void showFavoriteMovies() {
+        mMovieRecyclerViewAdapter.setMovieData(null);
+        mainViewModel.getFavoriteMovies().observe(this, movies -> {
+            Log.d(TAG, "Updating list of movies from favorite LiveData in ViewModel");
+            if (movies != null) {
+                mMovieRecyclerViewAdapter.setMovieData(movies);
+                showMovieDataView();
+            }
+        });
+    }
+
     @Override
     public void onClick(Movie movie) {
-        AppExecutors.getInstance().diskIO().execute(() -> mainViewModel.insertOrUpdateMovie(movie));
-
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(MOVIE_INTENT_EXTRA, movie);
         startActivity(intent);
-
     }
 
     public boolean isNetworkAvailable(Context context) {
@@ -193,5 +215,11 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             return connected;
         }
         return false;
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(MENU_ID, menuId);
     }
 }

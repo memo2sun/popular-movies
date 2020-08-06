@@ -23,12 +23,9 @@ import net.sunyounglee.browsemovies.data.ReviewDao;
 import net.sunyounglee.browsemovies.data.TrailerDao;
 import net.sunyounglee.browsemovies.databinding.FragmentReviewBinding;
 import net.sunyounglee.browsemovies.models.Movie;
-import net.sunyounglee.browsemovies.models.Review;
 import net.sunyounglee.browsemovies.repositories.DetailViewRepository;
 import net.sunyounglee.browsemovies.viewModels.DetailViewModel;
 import net.sunyounglee.browsemovies.viewModels.DetailViewModelFactory;
-
-import java.util.List;
 
 public class ReviewFragment extends Fragment {
     private static final String TAG = ReviewFragment.class.getSimpleName();
@@ -42,6 +39,7 @@ public class ReviewFragment extends Fragment {
     private TextView mNoReviewMessage;
 
     private Movie movie;
+    private long movieId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,13 +49,13 @@ public class ReviewFragment extends Fragment {
             movie = intent.getParcelableExtra(MOVIE_INTENT_EXTRA);
         }
         assert movie != null;
-        long movieId = movie.getMovieId();
+        movieId = movie.getMovieId();
         AppDatabase mDb = AppDatabase.getInstance(this.getActivity());
         MovieDao movieDao = mDb.movieDao();
         ReviewDao reviewDao = mDb.reviewDao();
         TrailerDao trailerDao = mDb.trailerDao();
-        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movieId);
-        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movieId, getActivity().getApplication(), detailViewRepository);
+        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movie);
+        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movie, getActivity().getApplication(), detailViewRepository);
         detailViewModel = new ViewModelProvider(this, detailViewModelFactory).get(DetailViewModel.class);
 
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_review, container, false);
@@ -79,30 +77,43 @@ public class ReviewFragment extends Fragment {
         mReviewRecyclerViewAdapter = new ReviewRecyclerViewAdapter();
         mRecyclerView.setAdapter(mReviewRecyclerViewAdapter);
 
+        initView();
+
         setupViewModel();
 
     }
 
+    private void initView() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mNoReviewMessage.setVisibility(View.VISIBLE);
+    }
+
+    private void showReviewDataView() {
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mNoReviewMessage.setVisibility(View.INVISIBLE);
+    }
+
     private void setupViewModel() {
-        detailViewModel.getReviewsFromDB().observe(this, reviewList -> {
+
+        detailViewModel.getReviewsFromDB(movieId).observe(this, reviewList -> {
             if (reviewList == null || reviewList.size() == 0) {
                 loadReviewFromServer();
             } else {
                 Log.d(TAG, "Review Size from db : " + reviewList.size());
                 mReviewRecyclerViewAdapter.setReviewData(reviewList);
+                showReviewDataView();
             }
         });
     }
 
     private void loadReviewFromServer() {
-        detailViewModel.getReviews().observe(this, reviewPageObject -> {
-            List<Review> reviewList = reviewPageObject.getReviewResultList();
+        detailViewModel.getReviewFromServer().observe(this, reviewList -> {
             if (reviewList == null || reviewList.size() == 0) {
-                mRecyclerView.setVisibility(View.INVISIBLE);
-                mNoReviewMessage.setVisibility(View.VISIBLE);
+                initView();
             } else {
                 Log.d(TAG, "Review Size from server : " + reviewList.size());
                 mReviewRecyclerViewAdapter.setReviewData(reviewList);
+                showReviewDataView();
             }
         });
     }

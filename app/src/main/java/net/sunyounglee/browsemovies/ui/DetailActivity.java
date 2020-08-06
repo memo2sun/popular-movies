@@ -48,8 +48,6 @@ public class DetailActivity extends AppCompatActivity {
 
     private static final String MOVIE_INTENT_EXTRA = "MOVIE_DATA";
 
-    private static AppDatabase mDb;
-
     private TextView tvTitle;
     private ImageView imgBackDrop, imgPlay, favoriteOnOff;
 
@@ -74,45 +72,33 @@ public class DetailActivity extends AppCompatActivity {
 
         viewPagerSetup();
 
-        initViews();
-        mDb = AppDatabase.getInstance(this);
-
+        AppDatabase mDb = AppDatabase.getInstance(this);
         Intent intent = getIntent();
-
         if (intent != null && intent.hasExtra(MOVIE_INTENT_EXTRA)) {
             movie = intent.getParcelableExtra(MOVIE_INTENT_EXTRA);
-
         }
+
+        displayUpButton();
+
+        initViews();
+
         assert movie != null;
         mMovieId = movie.getMovieId();
         MovieDao movieDao = mDb.movieDao();
 
         ReviewDao reviewDao = mDb.reviewDao();
         TrailerDao trailerDao = mDb.trailerDao();
-        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, mMovieId);
-        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(mMovieId, getApplication(), detailViewRepository);
+        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movie);
+        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movie, getApplication(), detailViewRepository);
         detailViewModel = new ViewModelProvider(this, detailViewModelFactory).get(DetailViewModel.class);
 
-        detailViewModel.getMovies().observe(this, movie -> {
-            if (movie != null) {
-                populateMovieUI(movie);
-                mFavorite = movie.getIsFavorite();
-                Log.d(TAG, " favorite value: " + mFavorite);
-                if (mFavorite) {
-                    favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_24);
-                } else {
-                    favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_border_24);
-                }
-                mMovieId = movie.getMovieId();
-            }
-        });
+        populateMovieUI(movie);
 
-        detailViewModel.getTrailers().observe(this, trailerPageObject -> {
-            trailerList = trailerPageObject.getTrailerResultList();
+        detailViewModel.getTrailerFromServer().observe(this, trailers -> {
+            trailerList = trailers;
             if (trailerList != null && trailerList.size() != 0) {
                 mYoutubePath = YOUTUBE_BASE_URL + trailerList.get(0).getTrailerKey();
                 imgPlay.setOnClickListener(v -> {
-
                     Intent intent1 = new Intent(Intent.ACTION_VIEW);
                     intent1.setData(Uri.parse(mYoutubePath));
                     if (intent1.resolveActivity(getPackageManager()) != null) {
@@ -124,9 +110,13 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        detailViewModel.getReviews().observe(this, reviewPageObject -> reviewList = reviewPageObject.getReviewResultList());
+        detailViewModel.getReviewFromServer().observe(this, reviews -> reviewList = reviews);
     }
-    //  }
+
+    private void displayUpButton() {
+        getSupportActionBar().setTitle(movie.getTitle());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
     private void viewPagerSetup() {
         tabTitle = new String[]{"SYNOPSIS", "TRAILERS", "REVIEWS"};
@@ -140,41 +130,16 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-
-        tvTitle = mBinding.tvTitle;
-
+    //    tvTitle = mBinding.tvTitle;
         imgBackDrop = mBinding.ivBackdrop;
         imgPlay = mBinding.ivPlay;
         favoriteOnOff = mBinding.ivFavorite;
-
-        favoriteOnOff.setOnClickListener(v -> AppExecutors.getInstance().diskIO().execute(() -> {
-            if (mFavorite) {
-                detailViewModel.deleteMovie(mMovieId);
-                mDb.reviewDao().deleteReviewById(mMovieId);
-                mDb.trailerDao().deleteTrailerById(mMovieId);
-
-                runOnUiThread(() -> favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_border_24));
-                finish();
-            } else {
-                detailViewModel.addToFavorite(mMovieId);
-                for (Trailer trailer : trailerList) {
-                    trailer.setTrailer_movieId(mMovieId);
-                    mDb.trailerDao().insertTrailer(trailer);
-                }
-                for (Review review : reviewList) {
-                    review.setReview_movieId(mMovieId);
-                    mDb.reviewDao().insertReview(review);
-                }
-
-                runOnUiThread(() -> favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_24));
-            }
-        }));
     }
 
     private void populateMovieUI(Movie movieEntry) {
         if (movieEntry == null) return;
 
-        tvTitle.setText(movieEntry.getTitle());
+   //     tvTitle.setText(movieEntry.getTitle());
 
         String backDropPath = BACKDROP_IMG_URL + movieEntry.getBackDrop_image();
         Picasso.get()
@@ -184,6 +149,43 @@ public class DetailActivity extends AppCompatActivity {
                 .fit().centerCrop()
                 .into(imgBackDrop);
         imgPlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24);
+
+        detailViewModel.getMovieFromDB().observe(this, movie -> {
+            if (movie != null) {
+                Log.d(TAG, "movie is in db");
+                favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_24);
+                mFavorite = true;
+            } else {
+                Log.d(TAG, "movie is not in db");
+                favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_border_24);
+                mFavorite = false;
+            }
+            addOrDeleteFavoriteMovie(movieEntry);
+        });
+    }
+
+    private void addOrDeleteFavoriteMovie(Movie movieEntry) {
+        favoriteOnOff.setOnClickListener(v -> AppExecutors.getInstance().diskIO().execute(() -> {
+            if (mFavorite) {
+                detailViewModel.deleteMovie(mMovieId);
+                detailViewModel.deleteReview(mMovieId);
+                detailViewModel.deleteTrailer(mMovieId);
+                runOnUiThread(() -> favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_border_24));
+                finish();
+            } else {
+
+                detailViewModel.insertMovie(movieEntry);
+                for (Review review : reviewList) {
+                    review.setReview_movieId(mMovieId);
+                    detailViewModel.insertReview(review);
+                }
+                for (Trailer trailer : trailerList) {
+                    trailer.setTrailer_movieId(mMovieId);
+                    detailViewModel.insertTrailer(trailer);
+                }
+                runOnUiThread(() -> favoriteOnOff.setImageResource(R.drawable.ic_baseline_favorite_24));
+            }
+        }));
     }
 
     @Override

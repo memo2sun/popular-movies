@@ -24,12 +24,9 @@ import net.sunyounglee.browsemovies.data.ReviewDao;
 import net.sunyounglee.browsemovies.data.TrailerDao;
 import net.sunyounglee.browsemovies.databinding.FragmentTrailerBinding;
 import net.sunyounglee.browsemovies.models.Movie;
-import net.sunyounglee.browsemovies.models.Trailer;
 import net.sunyounglee.browsemovies.repositories.DetailViewRepository;
 import net.sunyounglee.browsemovies.viewModels.DetailViewModel;
 import net.sunyounglee.browsemovies.viewModels.DetailViewModelFactory;
-
-import java.util.List;
 
 public class TrailerFragment extends Fragment implements TrailerRecyclerViewAdapter.TrailerAdapterOnClickHandler {
     private static final String TAG = TrailerFragment.class.getSimpleName();
@@ -42,6 +39,7 @@ public class TrailerFragment extends Fragment implements TrailerRecyclerViewAdap
     private DetailViewModel detailViewModel;
     private Movie movie;
 
+    private long movieId;
     private FragmentTrailerBinding mBinding;
 
     @Override
@@ -51,14 +49,14 @@ public class TrailerFragment extends Fragment implements TrailerRecyclerViewAdap
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MOVIE_INTENT_EXTRA)) {
             movie = intent.getParcelableExtra(MOVIE_INTENT_EXTRA);
+            movieId = movie.getMovieId();
         }
-        long movieId = movie.getMovieId();
         AppDatabase mDb = AppDatabase.getInstance(this.getActivity());
         MovieDao movieDao = mDb.movieDao();
         ReviewDao reviewDao = mDb.reviewDao();
         TrailerDao trailerDao = mDb.trailerDao();
-        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movieId);
-        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movieId, getActivity().getApplication(), detailViewRepository);
+        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movie);
+        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movie, getActivity().getApplication(), detailViewRepository);
         detailViewModel = new ViewModelProvider(this, detailViewModelFactory).get(DetailViewModel.class);
 
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_trailer, container, false);
@@ -68,8 +66,6 @@ public class TrailerFragment extends Fragment implements TrailerRecyclerViewAdap
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
         LinearLayoutManager mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView = mBinding.rvTrailerList;
         mNoTrailerMessage = mBinding.tvNoTrailerMessage;
@@ -81,33 +77,42 @@ public class TrailerFragment extends Fragment implements TrailerRecyclerViewAdap
         mTrailerRecyclerViewAdapter = new TrailerRecyclerViewAdapter(this);
         mRecyclerView.setAdapter(mTrailerRecyclerViewAdapter);
 
+        initView();
         setupViewModel();
+    }
 
+    private void initView() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mNoTrailerMessage.setVisibility(View.VISIBLE);
+    }
+
+    private void showTrailerDataView() {
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mNoTrailerMessage.setVisibility(View.INVISIBLE);
     }
 
     private void setupViewModel() {
-        detailViewModel.getTrailerFromDB().observe(this, trailers -> {
+        detailViewModel.getTrailerFromDB(movieId).observe(this, trailers -> {
             if (trailers == null || trailers.size() == 0) {
                 loadTrailerFromServer();
             } else {
                 Log.d(TAG, "Trailer Size from DB: " + trailers.size());
                 mTrailerRecyclerViewAdapter.setTrailerData(trailers);
+                showTrailerDataView();
             }
         });
     }
 
     private void loadTrailerFromServer() {
-        detailViewModel.getTrailers().observe(this, trailerPageObject -> {
-            List<Trailer> trailers = trailerPageObject.getTrailerResultList();
+        detailViewModel.getTrailerFromServer().observe(this, trailers -> {
             if (trailers == null || trailers.size() == 0) {
-                mRecyclerView.setVisibility(View.INVISIBLE);
-                mNoTrailerMessage.setVisibility(View.VISIBLE);
+                initView();
             } else {
-                Log.d(TAG, "Trailer Size : " + trailers.size());
+                Log.d(TAG, "Trailer Size from server: " + trailers.size());
                 mTrailerRecyclerViewAdapter.setTrailerData(trailers);
+                showTrailerDataView();
             }
         });
-
     }
 
     @Override

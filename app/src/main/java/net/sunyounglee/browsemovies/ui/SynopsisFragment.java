@@ -35,22 +35,22 @@ public class SynopsisFragment extends Fragment {
     private DetailViewModel detailViewModel;
 
     private FragmentSynopsisBinding mBinding;
-    long movieId;
+    private Movie movieFromIntent;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MOVIE_INTENT_EXTRA)) {
-            Movie movieEntry = getActivity().getIntent().getParcelableExtra(MOVIE_INTENT_EXTRA);
-            movieId = movieEntry.getMovieId();
+            movieFromIntent = getActivity().getIntent().getParcelableExtra(MOVIE_INTENT_EXTRA);
+            long movieId = movieFromIntent.getMovieId();
         }
         AppDatabase mDb = AppDatabase.getInstance(this.getActivity());
         MovieDao movieDao = mDb.movieDao();
         ReviewDao reviewDao = mDb.reviewDao();
         TrailerDao trailerDao = mDb.trailerDao();
-        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movieId);
-        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movieId, getActivity().getApplication(), detailViewRepository);
+        DetailViewRepository detailViewRepository = DetailViewRepository.getInstance(movieDao, reviewDao, trailerDao, movieFromIntent);
+        DetailViewModelFactory detailViewModelFactory = new DetailViewModelFactory(movieFromIntent, getActivity().getApplication(), detailViewRepository);
         detailViewModel = new ViewModelProvider(this, detailViewModelFactory).get(DetailViewModel.class);
 
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_synopsis, container, false);
@@ -65,20 +65,26 @@ public class SynopsisFragment extends Fragment {
         tvOverview = mBinding.tvOverview;
         imgThumbnail = mBinding.ivMovieThumbnail;
 
-        detailViewModel.getMovies().observe(getActivity(), movie -> {
+        detailViewModel.getMovieFromDB().observe(getActivity(), movie -> {
             if (movie != null) {
-                movieId = movie.getMovieId();
-                tvOverview.setText(movie.getOverview());
-                tvReleaseDate.setText(movie.getRelease_date());
-                tvRating.setText(movie.getRating() + "/10");
-                String thumbnailPath = IMG_URL + movie.getPoster_image();
-
-                Picasso.get()
-                        .load(thumbnailPath)
-                        .placeholder(R.drawable.image_default)
-                        .error(R.drawable.image_error)
-                        .into(imgThumbnail);
+                populateUI(movie);
+            } else {
+                populateUI(movieFromIntent);
             }
         });
+    }
+
+    private void populateUI(Movie movie) {
+        tvOverview.setText(movie.getOverview());
+        tvReleaseDate.setText(movie.getRelease_date());
+        tvRating.setText(movie.getRating() + "/10");
+        String thumbnailPath = IMG_URL + movie.getPoster_image();
+
+        Picasso.get()
+                .load(thumbnailPath)
+                .placeholder(R.drawable.image_default)
+                .error(R.drawable.image_error)
+                .into(imgThumbnail);
+
     }
 }

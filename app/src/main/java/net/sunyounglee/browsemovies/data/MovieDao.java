@@ -3,6 +3,7 @@ package net.sunyounglee.browsemovies.data;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import net.sunyounglee.browsemovies.models.Movie;
@@ -12,7 +13,10 @@ import java.util.List;
 @Dao
 public interface MovieDao {
 
-    @Insert
+    @Query("SELECT * FROM movie")
+    LiveData<List<Movie>> loadAllMovies();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMovie(Movie movie);
 
     @Query("DELETE FROM movie WHERE movieId =:movieId")
@@ -22,12 +26,6 @@ public interface MovieDao {
     @Query("SELECT * FROM movie WHERE movieId = :id")
     LiveData<Movie> loadMovieById(long id);
 
-
-    @Query("SELECT * FROM movie WHERE isFavorite= 1")
-    LiveData<List<Movie>> loadFavoriteMovie();
-
-    @Query("UPDATE movie SET isFavorite =:flag WHERE movieId =:id")
-    void updateMovieFavorite(boolean flag, long id);
 
     @Query("SELECT COUNT(*) FROM movie WHERE movieId = :id")
     int getMovieCountById(long id);

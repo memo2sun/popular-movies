@@ -6,18 +6,19 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import net.sunyounglee.browsemovies.models.Movie;
 import net.sunyounglee.browsemovies.repositories.DetailViewRepository;
 
 public class DetailViewModelFactory implements ViewModelProvider.Factory {
 
     @NonNull
     private final Application application;
-    private final long movieId;
+    private final Movie movie;
     DetailViewRepository detailViewRepository;
 
-    public DetailViewModelFactory(long movieId, @NonNull Application application, DetailViewRepository detailViewRepository) {
+    public DetailViewModelFactory(Movie movie, @NonNull Application application, DetailViewRepository detailViewRepository) {
         this.application = application;
-        this.movieId = movieId;
+        this.movie = movie;
         this.detailViewRepository = detailViewRepository;
     }
 
@@ -25,7 +26,7 @@ public class DetailViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass == DetailViewModel.class) {
-            return (T) new DetailViewModel(movieId, application, detailViewRepository);
+            return (T) new DetailViewModel(movie, application, detailViewRepository);
         }
         return null;
     }

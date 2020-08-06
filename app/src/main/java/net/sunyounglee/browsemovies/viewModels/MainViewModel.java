@@ -31,7 +31,7 @@ public class MainViewModel extends AndroidViewModel {
         Log.d(TAG, "Actively retrieving the movies from the DataBase");
         mPopularMovies = mainViewRepository.getPopularMovies(context);
         mTopRatedMovies = mainViewRepository.getTopRatedMovies(context);
-        favoriteMovies = mainViewRepository.getFavoriteMovies();
+        favoriteMovies = mainViewRepository.getMovies();
     }
 
     public LiveData<MoviePageObject> getPopularMovies() {
@@ -46,7 +46,4 @@ public class MainViewModel extends AndroidViewModel {
         return favoriteMovies;
     }
 
-    public void insertOrUpdateMovie(Movie movie) {
-        mMainViewRepository.insertOrUpdate(movie);
-    }
 }

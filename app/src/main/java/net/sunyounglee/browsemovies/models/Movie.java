@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "movie")
-public class Movie implements Parcelable{
+public class Movie implements Parcelable {
 
     @PrimaryKey
     @SerializedName("id")
@@ -26,10 +26,8 @@ public class Movie implements Parcelable{
     private float rating;
     @SerializedName("release_date")
     private String release_date;
-    private boolean isFavorite;
 
-    public Movie(long movieId, String title, String poster_image, String backDrop_image, String overview, float rating, String release_date,
-                 boolean isFavorite) {
+    public Movie(long movieId, String title, String poster_image, String backDrop_image, String overview, float rating, String release_date) {
         this.movieId = movieId;
         this.title = title;
         this.poster_image = poster_image;
@@ -37,7 +35,6 @@ public class Movie implements Parcelable{
         this.overview = overview;
         this.rating = rating;
         this.release_date = release_date;
-        this.isFavorite = isFavorite;
     }
 
 
@@ -49,7 +46,6 @@ public class Movie implements Parcelable{
         overview = in.readString();
         rating = in.readFloat();
         release_date = in.readString();
-        isFavorite = in.readByte() != 0;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -64,7 +60,7 @@ public class Movie implements Parcelable{
         }
     };
 
-    public  long getMovieId() {
+    public long getMovieId() {
         return movieId;
     }
 
@@ -92,10 +88,6 @@ public class Movie implements Parcelable{
         return release_date;
     }
 
-    public boolean getIsFavorite() {
-        return isFavorite;
-    }
-
     @Override
     public String toString() {
         return new StringBuffer()
@@ -107,7 +99,6 @@ public class Movie implements Parcelable{
                 .append(", overview='" + overview + '\'')
                 .append(", rating='" + rating + '\'')
                 .append(", release_date='" + release_date + '\'')
-                .append(", isFavorite = '" + isFavorite + '\'')
                 .append('}').toString();
     }
 
@@ -125,6 +116,5 @@ public class Movie implements Parcelable{
         dest.writeString(overview);
         dest.writeFloat(rating);
         dest.writeString(release_date);
-        dest.writeByte((byte) (isFavorite ? 1 : 0));
     }
 }

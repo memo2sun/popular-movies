@@ -8,10 +8,14 @@ import androidx.lifecycle.MutableLiveData;
 
 import net.sunyounglee.browsemovies.R;
 import net.sunyounglee.browsemovies.models.MoviePageObject;
+import net.sunyounglee.browsemovies.models.Review;
 import net.sunyounglee.browsemovies.models.ReviewPageObject;
+import net.sunyounglee.browsemovies.models.Trailer;
 import net.sunyounglee.browsemovies.models.TrailerPageObject;
 
 import org.json.JSONObject;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,9 +49,7 @@ public class MovieJsonUtils {
                     MoviePageObject moviePageObject = response.body();
                     movieData.setValue(moviePageObject);
                 } else {
-                    //   showErrorMessage();
                     Log.d(TAG, "response code: " + response.code());
-                    //     assert response.errorBody() != null;
                     String data = response.errorBody().toString();
                     try {
                         JSONObject jObjError = new JSONObject(data);
@@ -67,10 +69,9 @@ public class MovieJsonUtils {
         return movieData;
     }
 
-
-    public static LiveData<ReviewPageObject> loadReviewDataFromServer(Context context, long movieId) {
+    public static LiveData<List<Review>> loadReviewDataFromServer(Context context, long movieId) {
         API_KEY = context.getString(R.string.my_api_key);
-        MutableLiveData<ReviewPageObject> reviewData = new MutableLiveData<>();
+        MutableLiveData<List<Review>> reviewList = new MutableLiveData<>();
         Call<ReviewPageObject> call = service.reviewList(movieId, API_KEY);
         call.enqueue(new Callback<ReviewPageObject>() {
 
@@ -78,7 +79,10 @@ public class MovieJsonUtils {
             public void onResponse(Call<ReviewPageObject> call, Response<ReviewPageObject> response) {
                 if (response.isSuccessful()) {
                     ReviewPageObject reviewPageObject = response.body();
-                    reviewData.setValue(reviewPageObject);
+
+                    reviewList.setValue(reviewPageObject.getReviewResultList());
+                    Log.d(TAG, "Review size: " + String.valueOf(reviewList.getValue().size()));
+                    //  reviewData.setValue(reviewPageObject);
 
                 } else {
                     Log.d(TAG, "response code: " + response.code());
@@ -99,22 +103,22 @@ public class MovieJsonUtils {
                 Log.d(TAG, t.getMessage());
             }
         });
-        return reviewData;
+        return reviewList;
     }
 
-    public static LiveData<TrailerPageObject> loadTrailerDataFromServer(Context context, long movieId) {
+    public static MutableLiveData<List<Trailer>> loadTrailerDataFromServer(Context context, long movieId) {
         API_KEY = context.getString(R.string.my_api_key);
-        MutableLiveData<TrailerPageObject> trailerData = new MutableLiveData<>();
+        MutableLiveData<List<Trailer>> trailerList = new MutableLiveData<>();
         Call<TrailerPageObject> call = service.trailerList(movieId, API_KEY);
         call.enqueue(new Callback<TrailerPageObject>() {
-
             @Override
             public void onResponse(Call<TrailerPageObject> call, Response<TrailerPageObject> response) {
                 if (response.isSuccessful()) {
                     TrailerPageObject trailerPageObject = response.body();
-                    trailerData.setValue(trailerPageObject);
+                    trailerList.setValue(trailerPageObject.getTrailerResultList());
+                    Log.d(TAG, "Trailer size: " + String.valueOf(trailerList.getValue().size()));
+
                 } else {
-                    //   showErrorMessage();
                     Log.d(TAG, "response code: " + response.code());
                     String data = response.errorBody().toString();
                     try {
@@ -131,6 +135,6 @@ public class MovieJsonUtils {
                 Log.d(TAG, t.getMessage());
             }
         });
-        return trailerData;
+        return trailerList;
     }
 }
