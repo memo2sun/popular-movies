@@ -46,11 +46,20 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    //Recycler view
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+
+    //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    //Retrofit RX Java
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
+
+    //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
+    //Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
@@ -67,18 +76,17 @@ dependencies {
     // alternately - if using Java8, use the following instead of lifecycle-compiler
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
-    //Firebase job dispatcher
-    implementation 'com.firebase:firebase-jobdispatcher:0.8.6'
-
-    //WorkManager
-    implementation "androidx.work:work-runtime:$versions_work"
-
     //Dependency on Futures
-    implementation "androidx.concurrent:concurrent-futures:1.0.0"
+   // implementation "androidx.concurrent:concurrent-futures:1.0.0"
 
+    //ViewPager2
     implementation "androidx.viewpager2:viewpager2:1.0.0"
 
-    implementation 'com.google.android.material:material:1.3.0-alpha02'
+    //Material design
+    implementation 'com.google.android.material:material:1.1.0'
 
+    // RxJava
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.9'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
 }

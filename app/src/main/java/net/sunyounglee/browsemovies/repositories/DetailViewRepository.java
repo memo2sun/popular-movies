@@ -1,7 +1,5 @@
 package net.sunyounglee.browsemovies.repositories;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 
 import net.sunyounglee.browsemovies.data.MovieDao;
@@ -10,7 +8,6 @@ import net.sunyounglee.browsemovies.data.TrailerDao;
 import net.sunyounglee.browsemovies.models.Movie;
 import net.sunyounglee.browsemovies.models.Review;
 import net.sunyounglee.browsemovies.models.Trailer;
-import net.sunyounglee.browsemovies.utilities.MovieJsonUtils;
 
 import java.util.List;
 
@@ -21,14 +18,12 @@ public class DetailViewRepository {
     private static DetailViewRepository sInstance;
     private static final Object LOCK = new Object();
     private long movieId;
-    private Movie movieEntry;
 
     private DetailViewRepository(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, Movie movie) {
         this.movieDao = movieDao;
         this.reviewDao = reviewDao;
         this.trailerDao = trailerDao;
-        movieEntry = movie;
-        movieId = movieEntry.getMovieId();
+        movieId = movie.getMovieId();
     }
 
     public static DetailViewRepository getInstance(MovieDao movieDao, ReviewDao reviewDao, TrailerDao trailerDao, Movie movie) {
@@ -38,14 +33,6 @@ public class DetailViewRepository {
             }
         }
         return sInstance;
-    }
-
-    public LiveData<List<Review>> reviewFromServer(Context context, long movieId) {
-        return MovieJsonUtils.loadReviewDataFromServer(context, movieId);
-    }
-
-    public LiveData<List<Trailer>> trailerFromServer(Context context, long movieId) {
-        return MovieJsonUtils.loadTrailerDataFromServer(context, movieId);
     }
 
     public LiveData<Movie> getMovie() {
@@ -86,7 +73,7 @@ public class DetailViewRepository {
 
     public void insertTrailer(Trailer trailer) {
         trailerDao.insertTrailer(trailer);
-
     }
+
 
 }

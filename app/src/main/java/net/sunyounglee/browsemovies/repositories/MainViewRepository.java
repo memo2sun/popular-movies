@@ -1,13 +1,9 @@
 package net.sunyounglee.browsemovies.repositories;
 
-import android.content.Context;
-
 import androidx.lifecycle.LiveData;
 
 import net.sunyounglee.browsemovies.data.MovieDao;
 import net.sunyounglee.browsemovies.models.Movie;
-import net.sunyounglee.browsemovies.models.MoviePageObject;
-import net.sunyounglee.browsemovies.utilities.MovieJsonUtils;
 
 import java.util.List;
 
@@ -29,18 +25,6 @@ public class MainViewRepository {
             }
         }
         return sInstance;
-    }
-
-    public LiveData<MoviePageObject> refreshMovie(Context context, int sortBy) {
-        return MovieJsonUtils.loadMovieDataFromServer(sortBy, context);
-    }
-
-    public LiveData<MoviePageObject> getPopularMovies(Context context) {
-        return refreshMovie(context, 1);
-    }
-
-    public LiveData<MoviePageObject> getTopRatedMovies(Context context) {
-        return refreshMovie(context, 2);
     }
 
     public LiveData<List<Movie>> getMovies() {

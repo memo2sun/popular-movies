@@ -80,11 +80,7 @@ public class TrailerRecyclerViewAdapter extends RecyclerView.Adapter<TrailerRecy
 
     @Override
     public int getItemCount() {
-        if (mTrailerDataList == null) {
-            return 0;
-        } else {
-            return mTrailerDataList.size();
-        }
+        return mTrailerDataList == null ? 0 : mTrailerDataList.size();
     }
 
     public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

@@ -35,16 +35,11 @@ public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecycl
 
         holder.mAuthor.setText(mReviewAuthor);
         holder.mContent.setText(mReviewContent);
-
     }
 
     @Override
     public int getItemCount() {
-        if (mReviewDataList == null) {
-            return 0;
-        } else {
-            return mReviewDataList.size();
-        }
+        return mReviewDataList == null ? 0 : mReviewDataList.size();
     }
 
     public static class ReviewAdapterViewHolder extends RecyclerView.ViewHolder {

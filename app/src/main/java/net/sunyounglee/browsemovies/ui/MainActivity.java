@@ -31,12 +31,12 @@ import net.sunyounglee.browsemovies.repositories.MainViewRepository;
 import net.sunyounglee.browsemovies.viewModels.MainViewModel;
 import net.sunyounglee.browsemovies.viewModels.MainViewModelFactory;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity implements MovieRecyclerViewAdapter.MovieAdapterOnClickHandler {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String MOVIE_INTENT_EXTRA = "MOVIE_DATA";
+    String SORT_BY_POPULARITY = "popular";
+    String SORT_BY_TOP_RATED = "top_rated";
 
     private static final String MENU_ID = "menu_id";
     private int menuId;
@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         ActivityMainBinding binding =
                 DataBindingUtil.setContentView(this, R.layout.activity_main);
         //   binding.setLifecycleOwner(this);
-
         AppDatabase mDb = AppDatabase.getInstance(this);
         MovieDao movieDao = mDb.movieDao();
         MainViewRepository mainViewRepository = MainViewRepository.getInstance(movieDao);
@@ -115,17 +114,17 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         if (savedInstanceStateBundle) {
             switch (menuId) {
                 case R.id.sort_by_popularity:
-                    showPopularMovies();
+                    showMovies(SORT_BY_POPULARITY);
                     break;
                 case R.id.sort_by_rate:
-                    showTopRatedMovies();
+                    showMovies(SORT_BY_TOP_RATED);
                     break;
                 case R.id.sort_by_favorite:
                     showFavoriteMovies();
                     break;
             }
         } else {
-            showPopularMovies();
+            showMovies(SORT_BY_POPULARITY);
         }
     }
 
@@ -141,10 +140,10 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         menuId = item.getItemId();
         switch (menuId) {
             case R.id.sort_by_popularity:
-                showPopularMovies();
+                showMovies(SORT_BY_POPULARITY);
                 return true;
             case R.id.sort_by_rate:
-                showTopRatedMovies();
+                showMovies(SORT_BY_TOP_RATED);
                 return true;
             case R.id.sort_by_favorite:
                 showFavoriteMovies();
@@ -153,21 +152,15 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         return super.onOptionsItemSelected(item);
     }
 
-    private void showPopularMovies() {
+    private void showMovies(String sortBy) {
         mMovieRecyclerViewAdapter.setMovieData(null);
-        mainViewModel.getPopularMovies().observe(this, moviePageObject -> {
+        if (sortBy.equals(SORT_BY_POPULARITY)) {
+            mainViewModel.loadMovieDataFromServer(SORT_BY_POPULARITY);
+        } else {
+            mainViewModel.loadMovieDataFromServer(SORT_BY_TOP_RATED);
+        }
+        mainViewModel.getMovies().observe(this, movies -> {
             Log.d(TAG, "Updating list of movies from POPULAR LiveData in ViewModel");
-            List<Movie> movies = moviePageObject.getResultList();
-            mMovieRecyclerViewAdapter.setMovieData(movies);
-            showMovieDataView();
-        });
-    }
-
-    private void showTopRatedMovies() {
-        mMovieRecyclerViewAdapter.setMovieData(null);
-        mainViewModel.getTopRatedMovies().observe(this, moviePageObject -> {
-            Log.d(TAG, "Updating list of movies from Top Rated LiveData in ViewModel");
-            List<Movie> movies = moviePageObject.getResultList();
             mMovieRecyclerViewAdapter.setMovieData(movies);
             showMovieDataView();
         });
