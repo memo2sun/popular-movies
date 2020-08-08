@@ -25,7 +25,6 @@ import io.reactivex.schedulers.Schedulers;
 public class MainViewModel extends AndroidViewModel {
 
     private static final String TAG = MainViewModel.class.getSimpleName();
-
     private static String API_KEY;
     private final MutableLiveData<List<Movie>> mMovieListFromServer = new MutableLiveData<>();
     private LiveData<List<Movie>> favoriteMovies;
@@ -45,8 +44,8 @@ public class MainViewModel extends AndroidViewModel {
         return favoriteMovies;
     }
 
-    public void loadMovieDataFromServer(String sortBy) {
-        MovieAPIService service = RetrofitClient.getRetrofitInstance().create(MovieAPIService.class);
+    public void loadMovieDataFromServer(String sortBy, Context context) {
+        MovieAPIService service = RetrofitClient.getRetrofitInstance(context).create(MovieAPIService.class);
         Log.d(TAG, "loadMovieDataFromServer");
         Log.d(TAG, sortBy);
         service.fetchAllMovies(sortBy, API_KEY)

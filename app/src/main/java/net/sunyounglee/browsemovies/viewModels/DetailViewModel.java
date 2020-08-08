@@ -44,8 +44,8 @@ public class DetailViewModel extends AndroidViewModel {
         API_KEY = context.getString(R.string.my_api_key);
         mDetailViewRepository = detailViewRepository;
         movies = mDetailViewRepository.getMovieFromDB(movieId);
-        loadReviewDataFromServer(movieId);
-        loadTrailerDataFromServer(movieId);
+        loadReviewDataFromServer(movieId, context);
+        loadTrailerDataFromServer(movieId,context);
     }
 
     public LiveData<Movie> getMovieFromDB() {
@@ -92,8 +92,8 @@ public class DetailViewModel extends AndroidViewModel {
         mDetailViewRepository.insertTrailer(trailer);
     }
 
-    private void loadReviewDataFromServer(long movieId) {
-        service = RetrofitClient.getRetrofitInstance().create(MovieAPIService.class);
+    private void loadReviewDataFromServer(long movieId, Context context) {
+        service = RetrofitClient.getRetrofitInstance(context).create(MovieAPIService.class);
         service.fetchAllReviews(movieId, API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -111,8 +111,8 @@ public class DetailViewModel extends AndroidViewModel {
                 });
     }
 
-    private void loadTrailerDataFromServer(long movieId) {
-        service = RetrofitClient.getRetrofitInstance().create(MovieAPIService.class);
+    private void loadTrailerDataFromServer(long movieId, Context context) {
+        service = RetrofitClient.getRetrofitInstance(context).create(MovieAPIService.class);
         service.fetchAllTrailers(movieId, API_KEY)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

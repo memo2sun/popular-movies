@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,13 +74,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         mRecyclerView = binding.rvMovieList;
         mErrorMessage = binding.tvErrorMessage;
 
-        int mNumberOfColumns;
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mNumberOfColumns = 3;
-        } else {
-            mNumberOfColumns = 4;
-        }
-
+        int mNumberOfColumns = calculateNoOfColumns();
         mGridLayoutManager = new GridLayoutManager(this, mNumberOfColumns);
         mRecyclerView.setLayoutManager(mGridLayoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -92,6 +87,16 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         showLoading();
 
         setupViewModel();
+    }
+
+    private int calculateNoOfColumns() {
+        DisplayMetrics displayMetrics = this.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int scalingFactor = 130;
+        int noOfColumns = (int) (dpWidth / scalingFactor);
+        if (noOfColumns < 2)
+            noOfColumns = 2;
+        return noOfColumns;
     }
 
     private void showMovieDataView() {
@@ -113,15 +118,14 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         }
         if (savedInstanceStateBundle) {
             switch (menuId) {
-                case R.id.sort_by_popularity:
-                    showMovies(SORT_BY_POPULARITY);
-                    break;
                 case R.id.sort_by_rate:
                     showMovies(SORT_BY_TOP_RATED);
                     break;
                 case R.id.sort_by_favorite:
                     showFavoriteMovies();
                     break;
+                default:
+                    showMovies(SORT_BY_POPULARITY);
             }
         } else {
             showMovies(SORT_BY_POPULARITY);
@@ -155,9 +159,9 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     private void showMovies(String sortBy) {
         mMovieRecyclerViewAdapter.setMovieData(null);
         if (sortBy.equals(SORT_BY_POPULARITY)) {
-            mainViewModel.loadMovieDataFromServer(SORT_BY_POPULARITY);
+            mainViewModel.loadMovieDataFromServer(SORT_BY_POPULARITY, this);
         } else {
-            mainViewModel.loadMovieDataFromServer(SORT_BY_TOP_RATED);
+            mainViewModel.loadMovieDataFromServer(SORT_BY_TOP_RATED, this);
         }
         mainViewModel.getMovies().observe(this, movies -> {
             Log.d(TAG, "Updating list of movies from POPULAR LiveData in ViewModel");
