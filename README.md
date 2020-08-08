@@ -10,6 +10,13 @@ Display the most popular movies and top rated movies playing, and store favorite
 - Able to mark a movie as a favorite, and store it locally.
 - Favorite movie collection can be viewed offline.
 
+<p float="left">
+  <img src="assets/mainActivity.png" width="230" />
+  <img src="assets/detailActivity_synopsis.png?" width="230" /> 
+  <img src="assets/detailActivity_trailers.png" width="230" />
+  <img src="assets/detailActivity_reviews.png" width="230" />
+</p>
+
 ## Installation
 1. Clone git repository.
 2. Request an [API key](https://www.themoviedb.org/documentation/api).
@@ -30,9 +37,3 @@ Display the most popular movies and top rated movies playing, and store favorite
 - Rxjava with Retrofit
 - Picasso
 - Viewpager2
-
-##Screenshots
-![Alt text](/assets/mainActivity.png?raw=true "Main Activity")
-![Alt text](/assets/detailActivity_synopsis.png?raw=true "Synopis")
-![Alt text](/assets/detailActivity_trailers.png?raw=true "Trailers")
-![Alt text](/assets/detailActivity_reviews.png?raw=true "Reviews")
